@@ -91,12 +91,6 @@ const FileSystemSchema: Tool[] = [
                 type: "string",
                 value: "UTF-8 text content to write.",
                 required: true
-            },
-            {
-                name: "overwrite",
-                type: "boolean",
-                value: "Whether to overwrite an existing file.",
-                required: false
             }
         ],
         return: {
