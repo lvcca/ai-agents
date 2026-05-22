@@ -1,0 +1,3 @@
+./orchestrator/prompts/*.md
+./orchestrator/prompts/types/*
+./docker-compose.yml
