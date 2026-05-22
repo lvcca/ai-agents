@@ -4,6 +4,7 @@ from src.state.state import Task_Type, create_execution_task, create_task, execu
 from src.logger import get_logger
 from src.worker.task_worker import start_task
 from src.worker.execution_worker import start_execution_task
+from bootstrap import registry
 
 app = FastAPI()
 
