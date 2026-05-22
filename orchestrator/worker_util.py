@@ -1,7 +1,7 @@
 import json
 from src.logger import get_logger
 import json
-from llm import PROMPTS
+from src.llm import PROMPTS
 from src.logger import get_logger
 import re
 
