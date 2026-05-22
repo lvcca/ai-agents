@@ -15,7 +15,6 @@ logger = get_logger('api')
 
 @app.get("/allTasks")
 async def alltasks():
-    logger.info('IM A TEST')
     allTasks = get_all_tasks(Task_Type.TASK)
     return {"allTasks": allTasks}
 
