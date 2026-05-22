@@ -1,8 +1,6 @@
-import json
 from src.logger import get_logger
 import json
 from src.llm import PROMPTS
-from src.logger import get_logger
 import re
 
 logger = get_logger('worker_util')

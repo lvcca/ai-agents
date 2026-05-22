@@ -1,6 +1,6 @@
 import threading
 import json
-from worker_util import extract_response_block, get_shell_context, safe_execute
+from src.worker.worker_util import extract_response_block, get_shell_context, safe_execute
 from src.state.state import update_execution_task
 from src.llm import call_llm_data_narrower, call_llm_shell_executor, call_llm_toolcall, PROMPTS
 from src.logger import get_logger
