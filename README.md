@@ -24,11 +24,6 @@ We welcome contributions from developers and users. If you'd like to contribute 
 
 AI-Agents is released under the [MIT License](https://opensource.org/licenses/MIT).
 
-## Credits
-
-* Developed by [Your Name]
-* Supported by [Sponsor's Name]
-
 ## Issues
 
 If you encounter any issues or have questions about using AI-Agents, please submit an issue on our GitHub repository.
