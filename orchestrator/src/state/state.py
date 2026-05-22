@@ -129,7 +129,6 @@ def execute_task(task_id, task, LLM_DIRECT = None):
         logger.error(f'something went wrong in execute_task {e}')
 
 
-
 def get_execution_task(task_id):
     data = r.get(execution_key(task_id))
     return json.loads(data) if data else None
