@@ -1,7 +1,7 @@
 import threading
 import json
 from worker_util import parse_json_safe
-from state import update_task
+from src.state.state import update_task
 from llm import call_llm_chat, call_llm_tasks
 from src.logger import get_logger
 

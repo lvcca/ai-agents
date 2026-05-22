@@ -8,7 +8,7 @@ def get_logger(filename):
         stream=sys.stdout, 
         format="%(asctime)s [%(levelname)s] %(message)s", 
         datefmt="%Y-%m-%d %H:%M:%S%z",
-        level=logging.DEBUG
+        level=logging.INFO
         )
 
     return logger

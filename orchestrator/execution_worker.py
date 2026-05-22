@@ -1,9 +1,8 @@
 import threading
 import json
 from worker_util import extract_response_block, safe_execute, tool_types
-from schemas.FileSystemSchema import FileSystemSchema
-from state import update_execution_task
-from llm import call_llm_data_narrower, call_llm_toolcall
+from src.state.state import update_execution_task
+from llm import call_llm_data_narrower, call_llm_toolcall, PROMPTS
 from src.logger import get_logger
 from bootstrap import registry
 import traceback
@@ -26,6 +25,10 @@ def process_task(task):
             try:
                 if Tool and Tool['name'] is not None:
                     Tool = Tool['name']
+
+                if Tool and type(Tool) is type(str()):
+                    if len(Tool.split('.')) > 0:
+                         Tool = Tool.split('.')[-1:]
 
             except Exception as e:
                 logger.warn('Tool["name"] check failed-- not fatal.')
@@ -88,12 +91,7 @@ def run_agents(task_id, task, LLM_DIRECT):
 
                 Your job is to take decomposed tasks written into concise executable steps and execute them using internal APIs identified in the FileSystemApiSchema.
                                     
-                FileSystemApiSchema:
-                {
-                    json.dumps(FileSystemSchema, indent=4)
-                }
-
-                Tool Request Format:
+                Tool Request Format AND FileSystemApiSchema:
                 {
                     json.dumps(tool_types, indent=4)
                 }
