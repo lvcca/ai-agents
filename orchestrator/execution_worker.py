@@ -1,6 +1,6 @@
 import threading
 import json
-from orchestrator.worker_util import extract_response_block, safe_execute, tool_types
+from worker_util import extract_response_block, safe_execute, tool_types
 from schemas.FileSystemSchema import FileSystemSchema
 from state import update_execution_task
 from llm import call_llm_data_narrower, call_llm_toolcall

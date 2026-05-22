@@ -1,4 +1,7 @@
 ./orchestrator/prompts/*.md
 ./orchestrator/prompts/types/**/*
 ./docker-compose.yml
-./orchestrator/src/__pycache__/*
+
+*/__pycache__/
+*.py[cod]
+*$py.class
