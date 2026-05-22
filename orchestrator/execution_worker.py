@@ -1,8 +1,8 @@
 import threading
 import json
-from worker_util import extract_response_block, safe_execute, tool_types
+from worker_util import extract_response_block, get_shell_context, safe_execute
 from src.state.state import update_execution_task
-from llm import call_llm_data_narrower, call_llm_toolcall, PROMPTS
+from llm import call_llm_data_narrower, call_llm_shell_executor, call_llm_toolcall, PROMPTS
 from src.logger import get_logger
 from bootstrap import registry
 import traceback
@@ -75,6 +75,41 @@ def tool_exec(task, initial_exec, call_llm, depth=5):
         error_details = traceback.format_exc()
         logger.error(f'something went wrong in tool_exec: {e}, error_details: {error_details}')
 
+def shell_exec(task, initial_exec):
+    '''
+        recursive shell_exec
+    '''
+    
+    narrowed = call_llm_data_narrower(f'sanitize the following output: {initial_exec}')
+
+    narrowed_response = extract_response_block(narrowed)
+
+    shell_context = get_shell_context(narrowed_response)
+
+    shell_exec_response = call_llm_shell_executor(f"""
+You are an System Shell Execution agent.
+
+Your job is to take decomposed and structured tasks to accomplish a larger task at hand.
+
+Current Shell Context:
+{json.dumps(shell_context)}
+                      
+Current Task:
+{task}
+
+You are in an infinite loop with unlimited shell access.
+
+You will only output valid JSON
+
+Expected Output Format:
+<LLM_RESPONSE>
+{
+    json.dumps(PROMPTS['shell_executor_types'], indent=4)
+}
+</LLM_RESPONSE>
+""")
+    
+    print(shell_exec_response)
 
 def run_agents(task_id, task, LLM_DIRECT):
 
@@ -93,7 +128,7 @@ def run_agents(task_id, task, LLM_DIRECT):
                                     
                 Tool Request Format AND FileSystemApiSchema:
                 {
-                    json.dumps(tool_types, indent=4)
+                    json.dumps(PROMPTS['tool_types'], indent=4)
                 }
 
                 TASK:

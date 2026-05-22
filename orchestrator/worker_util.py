@@ -80,3 +80,21 @@ def normalize_and_call(fn, Params):
     except Exception as e:
         logger.error(f'something went wrong in normalize_and_call: {e}, fn: {fn}, Params: {Params}')
         return fn()
+    
+def get_shell_context(narrowed_response):
+    default_shell_context = {
+        "input": None,
+        "output": None,
+        "error": None,
+    }
+
+    for key in default_shell_context.keys():
+        try:
+            value = narrowed_response.get("SessionStreams", {}).get(key)
+            if value is not None:
+                default_shell_context[key] = value
+                
+        except Exception as e:
+            logger.error(f"get_shell_context error for key={key}: {e}")
+
+    return default_shell_context
