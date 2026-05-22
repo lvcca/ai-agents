@@ -2,8 +2,8 @@ from fastapi import FastAPI
 import uuid
 from src.state.state import Task_Type, create_execution_task, create_task, execute_task, execution_key, get_all_tasks, get_task, remove_task, request_key
 from src.logger import get_logger
-from task_worker import start_task
-from execution_worker import start_execution_task
+from src.worker.task_worker import start_task
+from src.worker.execution_worker import start_execution_task
 
 app = FastAPI()
 
