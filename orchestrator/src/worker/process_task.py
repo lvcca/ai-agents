@@ -62,13 +62,13 @@ def process_task(task_id, task):
             except Exception as e:
                 logger.warning('Tool["name"] check failed -- not fatal.')
             
-            update_job(task_id, status="running-processing_step", jobs_created=f"{job_str(job_ids)}")
+            update_execution_task(task_id, status="running-processing_step", jobs_created=f"{job_str(job_ids)}")
             
             print(f'executing tool: {Tool}. Found params: {Params}, job_ids: job_ids')
             
             found_tool = registry.get(Tool)
 
-            update_job(task_id, status="running-found_tool", jobs_created=f"{job_str(job_ids)}")
+            update_execution_task(task_id, status="running-found_tool", jobs_created=f"{job_str(job_ids)}")
 
             if found_tool is not None:
                 

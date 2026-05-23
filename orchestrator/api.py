@@ -79,7 +79,6 @@ async def execute(payload: dict):
         logger.info(f'execution task: {task}')
 
         create_execution_task(execute_id, task)
-        execute_task(execute_id, task)
         start_execution_task(execute_id, task)
 
     except Exception as e:
