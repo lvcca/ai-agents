@@ -17,6 +17,11 @@ def run_agents(task_id, task, LLM_DIRECT):
             final_output = call_llm_toolcall(f"{task}")
 
         else:
+
+            update_execution_task(task_id, 
+                status="running - awaiting on initial exec",
+            )
+
             initial_exec = call_llm_toolcall(f"""
                 You are an System Execution agent.
 
@@ -44,7 +49,7 @@ def run_agents(task_id, task, LLM_DIRECT):
             
             logger.info(f'initial_exec: {initial_exec}')
             
-            tool_exec(task, initial_exec)
+            tool_exec(task_id, task, initial_exec)
 
             final_output = initial_exec
             

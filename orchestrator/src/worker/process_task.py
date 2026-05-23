@@ -28,9 +28,9 @@ def process_task(task):
                          Tool = Tool.split('.')[-1:]
 
             except Exception as e:
-                logger.warn('Tool["name"] check failed-- not fatal.')
+                logger.warning('Tool["name"] check failed -- not fatal.')
             
-            print(f'emulating execution of tool: {Tool}. Found params: {Params}')
+            print(f'executing tool: {Tool}. Found params: {Params}')
             
             found_tool = registry.get(Tool)
 

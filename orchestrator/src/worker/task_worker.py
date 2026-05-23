@@ -8,7 +8,7 @@ from src.logger import get_logger
 logger = get_logger('task_worker')
 
 
-def revise_plan(task, plan, call_llm, depth=5):
+def revise_plan(task_id, task, plan, call_llm, depth=5):
     """
         Recursive bounded plan refinement.
     """
@@ -22,6 +22,10 @@ def revise_plan(task, plan, call_llm, depth=5):
     
     logger.info(f'current task: {task}')
     logger.info(f'current plan: {plan}')
+
+    update_task(task_id,
+            status=f"running - in revise plan, depth: {depth}"
+    )
 
     prompt = f"""
 You are a planning critic. You only have {depth} number of attempts left to get this right.
@@ -63,14 +67,14 @@ If not acceptable return the following data-structure:
     result = parse_json_safe(raw)
 
     if result is None:
-        return revise_plan(task, plan, call_llm, depth - 1)
+        return revise_plan(task_id, task, plan, call_llm, depth - 1)
 
     if result.get("approved") is True:
         return result
 
     new_plan = result.get("steps", plan)
 
-    return revise_plan(task, new_plan, call_llm, depth - 1)
+    return revise_plan(task_id, task, new_plan, call_llm, depth - 1)
 
 def run_agents(task_id, task, LLM_DIRECT):
 
@@ -106,7 +110,7 @@ def run_agents(task_id, task, LLM_DIRECT):
                 {task}
                 """)
             
-            revised_plan = revise_plan(task, plan, call_llm_tasks)
+            revised_plan = revise_plan(task_id, task, plan, call_llm_tasks)
 
             final_output = call_llm_tasks(f"""
                 You are an execution agent.

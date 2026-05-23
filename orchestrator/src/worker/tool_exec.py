@@ -1,5 +1,7 @@
 import json
+from unittest import result
 
+from src.state.state import update_execution_task
 from src.llm import call_llm_data_narrower
 from src.worker.process_task import process_task 
 from src.worker.worker_util import extract_response_block
@@ -7,7 +9,12 @@ from src.logger import error_details, get_logger
 
 logger = get_logger('tool_exec')
 
-def tool_exec(task, initial_exec):
+def tool_exec(task_id, task, initial_exec):
+
+    update_execution_task(task_id, 
+        status="running - in tool_exec",
+    )
+
     try:
         print(f'initial_exec: {initial_exec}')
 
@@ -32,4 +39,10 @@ def tool_exec(task, initial_exec):
 
 
     except Exception as e:
-        logger.error(f'something went wrong in tool_exec: {e}, error_details: {error_details()}')
+        msg = f'something went wrong in tool_exec: {e}, error_details: {error_details()}'
+        logger.error(msg)
+        
+        update_execution_task(task_id, 
+            status="failed",
+            result=msg
+        )
