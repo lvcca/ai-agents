@@ -1,7 +1,7 @@
 import traceback
 
 from src.worker.worker_util import safe_execute
-from src.logger import get_logger
+from src.logger import get_logger, error_details
 from bootstrap import registry
 
 logger = get_logger('execution_worker')
@@ -44,7 +44,6 @@ def process_task(task):
         successful = True
 
     except Exception as e:
-        error_details = traceback.format_exc()
-        logger.error(f'something went wrong in process_task: {e}, error_details: {error_details}')
+        logger.error(f'something went wrong in process_task: {e}, error_details: {error_details()}')
     
     return successful

@@ -1,10 +1,9 @@
 import json
-import traceback
 
 from src.llm import call_llm_data_narrower
 from src.worker.process_task import process_task 
 from src.worker.worker_util import extract_response_block
-from src.logger import get_logger
+from src.logger import error_details, get_logger
 
 logger = get_logger('tool_exec')
 
@@ -33,5 +32,4 @@ def tool_exec(task, initial_exec):
 
 
     except Exception as e:
-        error_details = traceback.format_exc()
-        logger.error(f'something went wrong in tool_exec: {e}, error_details: {error_details}')
+        logger.error(f'something went wrong in tool_exec: {e}, error_details: {error_details()}')

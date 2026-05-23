@@ -1,5 +1,6 @@
 import logging
-import sys  
+import sys
+import traceback  
 
 def get_logger(filename):
     logger = logging.getLogger(f"{__name__}.{filename}")
@@ -12,3 +13,7 @@ def get_logger(filename):
         )
 
     return logger
+
+def error_details():
+    error_details = traceback.format_exc()
+    return error_details

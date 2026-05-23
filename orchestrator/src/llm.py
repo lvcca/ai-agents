@@ -2,7 +2,7 @@ import traceback
 
 import requests
 from os import getenv
-from src.logger import get_logger 
+from src.logger import get_logger, error_details
 
 logger = get_logger('llm')
 
@@ -38,8 +38,7 @@ def load_context(prompts_md):
         PROMPTS_CONTENT += CONTEXT_END
 
     except Exception as e:
-        error_details = traceback.format_exc()
-        logger.error(f'something went wrong in load_context {e}, error details: {error_details}')
+        logger.error(f'something went wrong in load_context {e}, error details: {error_details()}')
     
     return PROMPTS_CONTENT
 

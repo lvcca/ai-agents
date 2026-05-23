@@ -1,8 +1,7 @@
-import traceback
 import redis
 import json
 from enum import Enum
-from src.logger import get_logger
+from src.logger import error_details, get_logger
 
 logger = get_logger('state')
 
@@ -34,8 +33,7 @@ def append_global_context(prompt):
         )
 
     except Exception as e:
-        error_details = traceback.format_exc()
-        logger.error(f'something went wrong in append_global_context {e}, error_details: {error_details}')
+        logger.error(f'something went wrong in append_global_context {e}, error_details: {error_details()}')
 
 
 ########
@@ -85,6 +83,8 @@ def remove_task(task_id):
     r.delete(request_key(task_id))
 
 def get_all_tasks(task_type: Task_Type):
+    keys = []
+    
     if Task_Type(task_type) == Task_Type.ALL:
         keys = r.scan_iter('*')
 
