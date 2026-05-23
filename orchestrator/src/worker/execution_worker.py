@@ -44,7 +44,7 @@ def run_agents(task_id, task, LLM_DIRECT):
             
             logger.info(f'initial_exec: {initial_exec}')
             
-            tool_exec(task, initial_exec, call_llm_toolcall)
+            tool_exec(task, initial_exec)
 
             final_output = initial_exec
             
