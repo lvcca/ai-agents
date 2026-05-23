@@ -23,29 +23,29 @@ def run_agents(task_id, task, LLM_DIRECT):
             )
 
             initial_exec = call_llm_toolcall(f"""
-                You are an System Execution agent.
+You are an System Execution agent.
 
-                Your job is to take decomposed tasks written into concise executable steps and execute them using internal APIs identified in the FileSystemApiSchema.
-                                    
-                Tool Request Format AND FileSystemApiSchema:
-                {
-                    json.dumps(PROMPTS['tool_types'], indent=4)
-                }
+Your job is to take decomposed tasks written into concise executable steps and execute them using internal APIs identified in the FileSystemApiSchema.
+                    
+Tool Request Format AND FileSystemApiSchema:
+{
+    json.dumps(PROMPTS['tool_types'], indent=4)
+}
 
-                TASK:
-                {task}
+TASK:
+{task}
 
-                RULES:
-                - Use ONLY valid JSON as output 
-                - Always explain reasoning
-                - Do NOT include markdown
-                - There are at most 5 steps
-                - Steps are concrete and actionable
-                - Any text not in Javascript notation WILL be prepended with a comment
+RULES:
+- Use ONLY valid JSON as output 
+- Always explain reasoning
+- Do NOT include markdown
+- There are at most 5 steps
+- Steps are concrete and actionable
+- Any text not in Javascript notation WILL be prepended with a comment
 
-                ONLY ACCEPTABLE OUTPUT FORMAT:
-                Tool_Output
-                """)
+ONLY ACCEPTABLE OUTPUT FORMAT:
+Tool_Output
+""")
             
             logger.info(f'initial_exec: {initial_exec}')
             

@@ -10,10 +10,16 @@ services:
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     entrypoint: >
       bash -c "
-      export OLLAMA_CONTEXT_LENGTH=64000 &&
+      export OLLAMA_CONTEXT_LENGTH=128000 &&
       ollama serve & sleep 10 &&
       ollama pull llama3.1 &&
       ollama pull qwen2.5:7b &&
@@ -54,18 +60,18 @@ services:
     gpus: all
 
 
-  # -----------------------------
-  # QDRANT (VECTOR MEMORY)
-  # -----------------------------
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: ai-qdrant
-    ports:
-      - "6333:6333"
-    volumes:
-      - qdrant_data:/qdrant/storage
-    restart: unless-stopped
-    gpus: all
+  # # -----------------------------
+  # # QDRANT (VECTOR MEMORY)
+  # # -----------------------------
+  # qdrant:
+  #   image: qdrant/qdrant:latest
+  #   container_name: ai-qdrant
+  #   ports:
+  #     - "6333:6333"
+  #   volumes:
+  #     - qdrant_data:/qdrant/storage
+  #   restart: unless-stopped
+  #   gpus: all
 
 
 volumes:

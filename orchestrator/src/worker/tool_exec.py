@@ -34,8 +34,18 @@ def tool_exec(task_id, task, initial_exec):
             print('identified_internal_tools_required not empty! Start processing tasks...');
             process_task(task)
 
+            update_execution_task(task_id, 
+                status="running - processing_task",
+            )
+
         else:
-            logger.error(f'something went wrong in tool exec, task:{task}')
+            msg = f'something went wrong in tool exec, task:{task}'
+            logger.error(msg)
+
+            update_execution_task(task_id, 
+                status="failed",
+                result=msg
+            )
 
 
     except Exception as e:
