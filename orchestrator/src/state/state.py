@@ -1,5 +1,4 @@
 import traceback
-
 import redis
 import json
 from enum import Enum

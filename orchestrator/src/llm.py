@@ -1,12 +1,12 @@
 import traceback
 
 import requests
-import os
+from os import getenv
 from src.logger import get_logger 
 
 logger = get_logger('llm')
 
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
+OLLAMA_URL = getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
 # prompts
 CODING_TASKS_PROMPTS_FILE = "prompts/coding_tasks_prompts.md"
