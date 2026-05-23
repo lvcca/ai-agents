@@ -1,115 +1,11 @@
 import threading
 import json
-from src.worker.worker_util import extract_response_block, get_shell_context, safe_execute
+from src.worker.tool_exec import tool_exec
 from src.state.state import update_execution_task
-from src.llm import call_llm_data_narrower, call_llm_shell_executor, call_llm_toolcall, PROMPTS
+from src.llm import call_llm_toolcall, PROMPTS
 from src.logger import get_logger
-from bootstrap import registry
-import traceback
 
 logger = get_logger('execution_worker')
-
-def process_task(task):
-    successful = False
-
-    steps = task['identified_internal_tools_required']
-    
-    try:
-        for step in steps:
-            Tool = step["Tool"]
-            Params = None
-
-            if step["Params"] is not None:
-                Params = step["Params"]
-
-            try:
-                if Tool and Tool['name'] is not None:
-                    Tool = Tool['name']
-
-                if Tool and type(Tool) is type(str()):
-                    if len(Tool.split('.')) > 0:
-                         Tool = Tool.split('.')[-1:]
-
-            except Exception as e:
-                logger.warn('Tool["name"] check failed-- not fatal.')
-            
-            print(f'emulating execution of tool: {Tool}. Found params: {Params}')
-            
-            found_tool = registry.get(Tool)
-
-            if found_tool is not None:
-                print(f'found tool: {found_tool.__name__}')
-                result = safe_execute(found_tool, Params)
-                print(f'{found_tool} result: {result}')
-
-        
-        successful = True
-
-    except Exception as e:
-        error_details = traceback.format_exc()
-        logger.error(f'something went wrong in process_task: {e}, error_details: {error_details}')
-    
-    return successful
-
-def tool_exec(task, initial_exec, call_llm, depth=5):
-    print(f'initial_exec: {initial_exec}')
-
-    narrowed = call_llm_data_narrower(f'sanitize the following output: {initial_exec}')
-
-    print(f'narrowed: {narrowed}')
-
-    test = extract_response_block(narrowed)
-
-    print(f'extracted_json: {test}')
-
-    try:
-        task = json.loads(test)
-
-        tasks = task['identified_internal_tools_required']
-
-        if tasks is not None and len(tasks) > 0:
-            print('identified_internal_tools_required not empty! Start processing tasks...');
-            process_task(task)
-    
-    except Exception as e:
-        error_details = traceback.format_exc()
-        logger.error(f'something went wrong in tool_exec: {e}, error_details: {error_details}')
-
-def shell_exec(task, initial_exec):
-    '''
-        recursive shell_exec
-    '''
-    
-    narrowed = call_llm_data_narrower(f'sanitize the following output: {initial_exec}')
-
-    narrowed_response = extract_response_block(narrowed)
-
-    shell_context = get_shell_context(narrowed_response)
-
-    shell_exec_response = call_llm_shell_executor(f"""
-You are an System Shell Execution agent.
-
-Your job is to take decomposed and structured tasks to accomplish a larger task at hand.
-
-Current Shell Context:
-{json.dumps(shell_context)}
-                      
-Current Task:
-{task}
-
-You are in an infinite loop with unlimited shell access.
-
-You will only output valid JSON
-
-Expected Output Format:
-<LLM_RESPONSE>
-{
-    json.dumps(PROMPTS['shell_executor_types'], indent=4)
-}
-</LLM_RESPONSE>
-""")
-    
-    print(shell_exec_response)
 
 def run_agents(task_id, task, LLM_DIRECT):
 

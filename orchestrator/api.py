@@ -14,6 +14,9 @@ app = FastAPI()
 
 logger = get_logger('api')
 
+def Registery(*args, **kwargs):
+    return registry(*args, **kwargs)
+
 @app.get("/allTasks")
 async def alltasks():
     allTasks = get_all_tasks(Task_Type.TASK)

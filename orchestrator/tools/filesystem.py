@@ -58,7 +58,6 @@ def copy_file(src: str, dst: str) -> None:
 def delete_file(path: str) -> None:
     os.remove(resolve_path(path))
 
-
 def file_exists(path: str) -> bool:
     return os.path.isfile(resolve_path(path))
 
