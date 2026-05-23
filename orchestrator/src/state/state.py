@@ -39,22 +39,25 @@ def append_global_context(prompt):
 ########
 # Task / Request Setup
 ########
-def request_key(task_id: str) -> str:
-    _constant = "request:"
+
+def generic_key(task_id, _constant: str) -> str:
+    try:
+        if _constant not in task_id:
+            return f"{_constant}{task_id}"
+        else:
+            return task_id
+    except Exception as e:
+        logger.error(f'something went wrong in generic_key {e}, error_details: {error_details()}')
     
-    if _constant not in task_id:
-        return f"{_constant}{task_id}"
-    else:
-        return task_id
+def request_key(task_id: str):
+    return generic_key(task_id, 'request:')
 
-def execution_key(task_id: str) -> str:
-    _constant = "execution:"
+def execution_key(task_id: str):
+    return generic_key(task_id, 'execution:')
 
-    if _constant not in task_id:
-        return f"{_constant}{task_id}"
-    else:
-        return task_id
-
+def job_key(task_id: str):
+    return generic_key(task_id, 'job:')
+    
 def create_task(task_id, task, LLM_DIRECT = None):
     r.set(request_key(task_id), json.dumps({
         "status": "queued",
@@ -137,6 +140,52 @@ def remove_execution_task(task_id):
 
 def update_execution_task(task_id, **fields):
     _task_id = execution_key(task_id)
+    
+    data = json.loads(r.get(_task_id))
+    data.update(fields)
+
+    r.set(request_key(_task_id), json.dumps(data))
+
+########
+# Job context
+########
+
+def create_job(task_id, task, LLM_DIRECT = None):
+    r.set(job_key(task_id), json.dumps({
+        "status": "queued",
+        "task": task,
+        "result": None,
+        "LLM_DIRECT": LLM_DIRECT
+    }))
+
+def start_job(task_id, task, LLM_DIRECT = None):
+    try:
+        job_id = job_key(task_id)
+        
+        # get existing context
+        context = json.loads(r.get(job_id))
+        context = context.get('context', task) 
+
+        # set update context and task
+        r.set(job_id, json.dumps({
+            "context": context,
+            "task": task,
+            "LLM_DIRECT": LLM_DIRECT
+        }))
+
+    except Exception as e:
+        logger.error(f'something went wrong in execute_task {e}')
+
+
+def get_job(task_id):
+    data = r.get(job_key(task_id))
+    return json.loads(data) if data else None
+
+def remove_job(task_id):
+    r.delete(job_key(task_id))
+
+def update_job(task_id, **fields):
+    _task_id = job_key(task_id)
     
     data = json.loads(r.get(_task_id))
     data.update(fields)

@@ -1,5 +1,5 @@
 import json
-from unittest import result
+import uuid
 
 from src.state.state import update_execution_task
 from src.llm import call_llm_data_narrower
@@ -28,15 +28,11 @@ def tool_exec(task_id, task, initial_exec):
         
         task = json.loads(json_response)
 
-        tasks = task['identified_internal_tools_required']
+        steps = task['identified_internal_tools_required']
 
-        if tasks is not None and len(tasks) > 0:
-            print('identified_internal_tools_required not empty! Start processing tasks...');
-            process_task(task)
-
-            update_execution_task(task_id, 
-                status="running - processing_task",
-            )
+        if steps is not None and len(steps) > 0:
+            update_execution_task(task_id, status="running - processing_step")
+            process_task(task_id, task)
 
         else:
             msg = f'something went wrong in tool exec, task:{task}'

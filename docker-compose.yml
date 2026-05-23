@@ -19,7 +19,6 @@ services:
               capabilities: [gpu]
     entrypoint: >
       bash -c "
-      export OLLAMA_CONTEXT_LENGTH=128000 &&
       ollama serve & sleep 10 &&
       ollama pull llama3.1 &&
       ollama pull qwen2.5:7b &&
