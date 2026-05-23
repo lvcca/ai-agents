@@ -10,9 +10,10 @@ r = redis.Redis(host="redis", port=6379, decode_responses=True)
 GLOBAL_CTX = "GLOBAL_CTX"
 
 class Task_Type(Enum):
+    ALL = 0
     TASK = 1
     EXECUTION = 2
-    ALL = 3
+    JOB = 3
 
 def get_global_context():
     _current_context = r.get(GLOBAL_CTX)
@@ -42,6 +43,9 @@ def append_global_context(prompt):
 
 def generic_key(task_id, _constant: str) -> str:
     try:
+        # if ':' in task_id:
+        #     logger.warning(f'this looks like a rekey task_id: {task_id}, _constant: {_constant}')
+
         if _constant not in task_id:
             return f"{_constant}{task_id}"
         else:
@@ -59,7 +63,9 @@ def job_key(task_id: str):
     return generic_key(task_id, 'job:')
     
 def create_task(task_id, task, LLM_DIRECT = None):
-    r.set(request_key(task_id), json.dumps({
+    id = f"{request_key(task_id)}"
+    r.set(id, json.dumps({
+        "id": f"{id}",
         "status": "queued",
         "task": task,
         "result": None,
@@ -72,20 +78,14 @@ def update_task(task_id, **fields):
     r.set(request_key(task_id), json.dumps(data))
 
 def get_task(task_id):
-    key = ""
-    
-    if request_key('') not in task_id:
-        key = request_key(task_id)
-    else:
-        key = task_id
-
+    key = request_key(task_id)
     data = r.get(key)
     return json.loads(data) if data else None
 
 def remove_task(task_id):
     r.delete(request_key(task_id))
 
-def get_all_tasks(task_type: Task_Type):
+def get_tasks(task_type: Task_Type = Task_Type.ALL):
     keys = []
     
     if Task_Type(task_type) == Task_Type.ALL:
@@ -96,8 +96,12 @@ def get_all_tasks(task_type: Task_Type):
 
     if Task_Type(task_type) == Task_Type.EXECUTION:
         keys = r.scan_iter(execution_key('*'))
+    
+    if Task_Type(task_type) == Task_Type.JOB:
+        keys = r.scan_iter(job_key('*'))
 
     tasks = [i for i in keys]
+
     return tasks
 
 ########
@@ -105,7 +109,10 @@ def get_all_tasks(task_type: Task_Type):
 ########
 
 def create_execution_task(task_id, task, LLM_DIRECT = None):
-    r.set(execution_key(task_id), json.dumps({
+    id = execution_key(task_id)
+
+    r.set(id, json.dumps({
+        "id": f"{id}",
         "status": "queued",
         "task": task,
         "result": None,
@@ -150,31 +157,19 @@ def update_execution_task(task_id, **fields):
 # Job context
 ########
 
-def create_job(task_id, task, LLM_DIRECT = None):
-    r.set(job_key(task_id), json.dumps({
+def create_job(job_id, job):
+    id = job_key(job_id)
+    r.set(id, json.dumps({
+        "id":f"{id}",
         "status": "queued",
-        "task": task,
-        "result": None,
-        "LLM_DIRECT": LLM_DIRECT
+        "job": job,
     }))
 
-def start_job(task_id, task, LLM_DIRECT = None):
-    try:
-        job_id = job_key(task_id)
-        
-        # get existing context
-        context = json.loads(r.get(job_id))
-        context = context.get('context', task) 
-
-        # set update context and task
-        r.set(job_id, json.dumps({
-            "context": context,
-            "task": task,
-            "LLM_DIRECT": LLM_DIRECT
-        }))
-
-    except Exception as e:
-        logger.error(f'something went wrong in execute_task {e}')
+def start_job(job_id, job):
+    r.set(job_key(job_id), json.dumps({
+        "status": "started",
+        "job": job,
+    }))
 
 
 def get_job(task_id):
@@ -186,8 +181,19 @@ def remove_job(task_id):
 
 def update_job(task_id, **fields):
     _task_id = job_key(task_id)
-    
-    data = json.loads(r.get(_task_id))
-    data.update(fields)
 
-    r.set(request_key(_task_id), json.dumps(data))
+    try:
+        curr = r.get(_task_id)
+        
+        if curr is None:
+            r.set(_task_id, json.dumps({
+                "status": "started",    
+            }))
+
+        data = json.loads(r.get(_task_id))
+        data.update(fields)
+
+        r.set(job_key(_task_id), json.dumps(data))
+
+    except Exception as e:
+        logger.error(f'something went wrong in update_job, {e} detailed_error: {error_details()}')

@@ -1,6 +1,7 @@
+from src.state.state import update_job
 from src.logger import get_logger
 import json
-from src.llm import PROMPTS
+from src.llm import PROMPTS, error_details
 import re
 
 logger = get_logger('worker_util')
@@ -25,9 +26,9 @@ def extract_response_block(text: str) -> str | None:
     return None
 
 
-def safe_execute(fn, Params):
+def safe_execute(key, fn, Params):
     try:
-        res = normalize_and_call(fn, Params)
+        res = normalize_and_call(key, fn, Params)
         return res
     except Exception as e:
         logger.error(f'something went wrong in safe_execute: {e}, fn: {fn.__name__}, Params: {Params}')
@@ -46,11 +47,14 @@ def get_params(Params):
     return xargs
 
 
-def normalize_and_call(fn, Params):
+def normalize_and_call(key, fn, Params):
     print('normalize and call')
+
+    update_job(key, status='in normalize call')
 
     try:
         if isinstance(Params, dict):
+            update_job(key, status="found params as dict")
             print('is dict')
             if (Params.items()) > 0:
                 return fn(**Params)
@@ -58,6 +62,7 @@ def normalize_and_call(fn, Params):
                 return fn()
         
         elif isinstance(Params, list):
+            update_job(key, status="found params as list")
             print('is list')
             if len(Params) > 0:
                 return fn(*get_params(Params))
@@ -65,6 +70,7 @@ def normalize_and_call(fn, Params):
                 return fn()
             
         elif isinstance(Params, str):
+            update_job(key, status="found params as str")
             print('is str')
             if len(Params) > 0:
                 return fn(Params)
@@ -72,11 +78,14 @@ def normalize_and_call(fn, Params):
                 return fn()
             
         else:
+            update_job(key, status="found params as default")
             print('is default')
             return fn()
     
     except Exception as e:
-        logger.error(f'something went wrong in normalize_and_call: {e}, fn: {fn}, Params: {Params}')
+        msg = f'something went wrong in normalize_and_call: {e}, fn: {fn}, Params: {Params}, error_details: {error_details()}'
+        logger.error(msg)
+        update_job(key, status="failed", error=msg)
         return fn()
     
 def get_shell_context(narrowed_response):

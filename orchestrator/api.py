@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uuid
-from src.state.state import Task_Type, create_execution_task, create_task, execute_task, execution_key, get_all_tasks, get_task, remove_task, request_key
+from src.state.state import Task_Type, create_execution_task, create_task, execute_task, execution_key, get_job, get_tasks, get_task, remove_execution_task, remove_task, request_key
 from src.logger import get_logger
 from src.worker.task_worker import start_task
 from src.worker.execution_worker import start_execution_task
@@ -19,7 +19,7 @@ def Registery(*args, **kwargs):
 
 @app.get("/allTasks")
 async def alltasks():
-    allTasks = get_all_tasks(Task_Type.TASK)
+    allTasks = get_tasks(Task_Type.TASK)
     return {"allTasks": allTasks}
 
 @app.post("/taskDirect")
@@ -60,8 +60,13 @@ async def rm_task(task_id: str):
 
 @app.get("/allExecutions")
 async def alltasks():
-    allExecutions = get_all_tasks(Task_Type.EXECUTION)
+    allExecutions = get_tasks(Task_Type.EXECUTION)
     return {"allExecutions": allExecutions}
+
+@app.post("/execution/delete/{exec_id}")
+async def rm_task(exec_id: str):
+    _exec_id = execution_key(exec_id)
+    return remove_execution_task(_exec_id)
 
 @app.post("/execute")
 async def execute(payload: dict):
@@ -87,3 +92,21 @@ async def execute(payload: dict):
         response["error"] = _err
     
     return response
+
+########
+# all jobs
+########
+
+@app.get("/job/allJobs")
+async def alltasks():
+    allJobs = get_tasks(Task_Type.JOB)
+    return {"allJobs": allJobs}
+
+@app.post("/job/delete/{job_id}")
+async def rm_task(job_id: str):
+    _job_id = execution_key(job_id)
+    return remove_execution_task(_job_id)
+
+@app.get("/job/{task_id}")
+async def task(task_id: str):
+    return get_job(task_id)

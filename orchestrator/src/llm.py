@@ -12,6 +12,7 @@ EXECUTION_PROMPTS_FILE = "prompts/execution_prompts.md"
 CHAT_PROMPTS_FILE = "prompts/chat_prompts.md"
 TOOL_NARROWER_PROMPTS_FILE = "prompts/tool_narrower.md"
 SHELL_EXECUTOR_PROMPTS_FILE = "prompts/shell_executor_prompts.md"
+KARPATHY_GUIDELINES_PROMPTS_FILE = "prompts/karpathy_guidelines_prompts.md"
 
 # types
 TOOL_API_TYPE_FILE = "prompts/types/ApiToolChain.ts"
@@ -47,19 +48,24 @@ PROMPTS = {
     "tool_narrower": load_context(TOOL_NARROWER_PROMPTS_FILE),
     # aux
     "tool_types": load_context(TOOL_API_TYPE_FILE),
+    "karpathy_guidelines" : load_context(KARPATHY_GUIDELINES_PROMPTS_FILE),
     # shell executor stuffs
     "shell_executor" : load_context(SHELL_EXECUTOR_PROMPTS_FILE),
     "shell_executor_types" : load_context(SHELL_EXECUTOR_TYPE_FILE),
+
+
 }
 
 def call_llm(prompt, model=QWEN3_CODER):
     try:
         logger.info(f'model: {model}, calling llm: {prompt}')
+
+        karpathy_guidelines = PROMPTS['karpathy_guidelines'] + '\n'
         
         # https://docs.ollama.com/api/generate
         response = requests.post(f"{OLLAMA_URL}/api/generate", json={
             "model": model,
-            "prompt": prompt,
+            "prompt": karpathy_guidelines + prompt,
             "stream": False
         })
 

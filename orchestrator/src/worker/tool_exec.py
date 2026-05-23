@@ -1,5 +1,4 @@
 import json
-import uuid
 
 from src.state.state import update_execution_task
 from src.llm import call_llm_data_narrower
@@ -13,6 +12,7 @@ def tool_exec(task_id, task, initial_exec):
 
     update_execution_task(task_id, 
         status="running - in tool_exec",
+        id=task_id
     )
 
     try:

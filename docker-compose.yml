@@ -10,15 +10,11 @@ services:
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    gpus: all
     entrypoint: >
       bash -c "
+      export OLLAMA_FLASH_ATTENTION=true &&
+      export OLLAMA_KV_CACHE_TYPE=q8_0 &&
       ollama serve & sleep 10 &&
       ollama pull llama3.1 &&
       ollama pull qwen2.5:7b &&
