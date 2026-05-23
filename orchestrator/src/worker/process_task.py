@@ -1,4 +1,3 @@
-import traceback
 
 from src.worker.worker_util import safe_execute
 from src.logger import get_logger, error_details

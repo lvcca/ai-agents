@@ -1,5 +1,3 @@
-import traceback
-
 import requests
 from os import getenv
 from src.logger import get_logger, error_details
