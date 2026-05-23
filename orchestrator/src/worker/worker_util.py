@@ -30,7 +30,7 @@ def safe_execute(fn, Params):
         res = normalize_and_call(fn, Params)
         return res
     except Exception as e:
-        logger.error(f'something went wrong in safe_execute: {e}')
+        logger.error(f'something went wrong in safe_execute: {e}, fn: {fn.__name__}, Params: {Params}')
 
 
 def get_params(Params):
