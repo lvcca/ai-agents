@@ -15,9 +15,11 @@ def tool_exec(task_id, task, initial_exec):
         id=task_id
     )
 
+    result = None
+
     try:
         print(f'initial_exec: {initial_exec}')
-
+        
         narrowed = call_llm_data_narrower(f'sanitize the following output: {initial_exec}')
 
         print(f'narrowed: {narrowed}')
@@ -33,7 +35,12 @@ def tool_exec(task_id, task, initial_exec):
         if steps is not None and len(steps) > 0:
             update_execution_task(task_id, status="running - processing_step")
             
-            process_task(task_id, task)
+            result = process_task(task_id, task)
+
+            update_execution_task(task_id,
+                status="failed",
+                task_result=result
+            )
 
         else:
             msg = f'something went wrong in tool exec, task:{task}'
@@ -53,3 +60,5 @@ def tool_exec(task_id, task, initial_exec):
             status="failed",
             result=msg
         )
+    
+    return result

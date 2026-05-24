@@ -163,7 +163,7 @@ def remove_execution_task(task_id):
 def update_execution_task(task_id, **fields):
     _task_id = execution_key(task_id)
 
-    print(f'updating execution_id: {_task_id}, with fields: {fields}')
+    logger.info(f'updating execution_id: {_task_id}, with fields: {fields}')
     
     try:
         curr = r.get(_task_id)
@@ -181,7 +181,7 @@ def update_execution_task(task_id, **fields):
 
         r.set(_task_id, json.dumps(data))
 
-        print(f'updated execution_id: {_task_id}, fields: {json.dumps(data)}')
+        logger.info(f'updated execution_id: {_task_id}, fields: {json.dumps(data)}')
 
     except Exception as e:
         logger.error(f'something went wrong in update_job, {e} detailed_error: {error_details()}')
@@ -219,26 +219,26 @@ def get_job(task_id):
 def remove_job(task_id):
     r.delete(job_key(task_id))
 
-def update_job(task_id, **fields):
+def update_job(job_id, **fields):
 
-    _task_id = job_key(task_id)
+    _job_id = job_key(job_id)
 
-    print(f'updating job_id: {_task_id}, with fields: {fields}')
+    print(f'updating job_id: {_job_id}, with fields: {fields}')
 
     try:
-        curr = r.get(_task_id)
+        curr = r.get(_job_id)
         
         if curr is None:
-            r.set(_task_id, json.dumps({
+            r.set(_job_id, json.dumps({
                 "status": "started",    
             }))
 
-        data = json.loads(r.get(_task_id))
+        data = json.loads(r.get(_job_id))
         data.update(fields)
 
-        r.set(job_key(_task_id), json.dumps(data))
+        r.set(job_key(_job_id), json.dumps(data))
 
-        print(f'updated job_id: {_task_id}, fields: {json.dumps(data)}')
+        print(f'updated job_id: {_job_id}, fields: {json.dumps(data)}')
 
     except Exception as e:
         logger.error(f'something went wrong in update_job, {e} detailed_error: {error_details()}')

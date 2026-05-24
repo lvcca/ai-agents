@@ -49,15 +49,11 @@ def run_agents(task_id, task, LLM_DIRECT):
             
             logger.info(f'initial_exec: {initial_exec}')
             
-            tool_exec(task_id, task, initial_exec)
+            tool_output = tool_exec(task_id, task, initial_exec)
 
-            final_output = initial_exec
+            final_output = tool_output
             
-            final_output = json.dumps({
-                "output": initial_exec, 
-                "task": task
-                }, indent=2, ensure_ascii=False
-            )
+            final_output = json.dumps({ "output": final_output, "task": task }, indent=2, ensure_ascii=False )
 
         update_execution_task(task_id,
             status="done",
