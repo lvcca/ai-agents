@@ -148,10 +148,24 @@ def remove_execution_task(task_id):
 def update_execution_task(task_id, **fields):
     _task_id = execution_key(task_id)
     
-    data = json.loads(r.get(_task_id))
-    data.update(fields)
+    try:
+        curr = r.get(_task_id)
+        
+        if curr is None:
+            logger.info(f'called update execution task but found nothing in redis... {curr}')
+            
+            r.set(_task_id, json.dumps({
+                "id": _task_id,
+                "status": "started",    
+            }))
 
-    r.set(request_key(_task_id), json.dumps(data))
+        data = json.loads(r.get(_task_id))
+        data.update(fields)
+
+        r.set(job_key(_task_id), json.dumps(data))
+
+    except Exception as e:
+        logger.error(f'something went wrong in update_job, {e} detailed_error: {error_details()}')
 
 ########
 # Job context

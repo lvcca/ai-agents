@@ -60,8 +60,8 @@ def run_agents(task_id, task, LLM_DIRECT):
             )
 
         update_execution_task(task_id,
-            # status="done",
-            status="completed",
+            status="done",
+            # status="completed",
             result=final_output
         )
 

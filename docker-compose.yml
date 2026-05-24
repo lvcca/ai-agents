@@ -19,6 +19,7 @@ services:
       ollama pull llama3.1 &&
       ollama pull qwen2.5:7b &&
       ollama pull qwen2.5-coder:14b &&
+      ollama pull granite4.1:3b &&
       wait
       "
 

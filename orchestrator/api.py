@@ -85,7 +85,7 @@ async def execute(payload: dict):
         logger.error(f'something went wrong in execute {e}')
         _err = e
 
-    response = {"execute_id": execute_id, "status": "queued"}
+    response = {"task_id": execute_id, "status": "queued"}
 
     if _err is not None:
         response["error"] = _err

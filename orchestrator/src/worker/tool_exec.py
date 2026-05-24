@@ -32,6 +32,7 @@ def tool_exec(task_id, task, initial_exec):
 
         if steps is not None and len(steps) > 0:
             update_execution_task(task_id, status="running - processing_step")
+            
             process_task(task_id, task)
 
         else:

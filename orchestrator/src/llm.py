@@ -21,6 +21,7 @@ SHELL_EXECUTOR_TYPE_FILE = "prompts/types/ShellExecutor.ts"
 # consts
 LLAMA_3_1 = "llama3.1"
 QWEN3_CODER = "qwen3-coder:30b"
+GRANITE_4 = "granite4.1:3b"
 
 def load_context(prompts_md):
     PROMPTS_CONTENT = ""

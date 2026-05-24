@@ -234,6 +234,25 @@ const FileSystemSchema: Tool[] = [
     },
 
     {
+        name: "execute_shell",
+        description: "Execute command with system shell.",
+        parameters: [
+            {
+                name: "command",
+                type: "string",
+                value: "Shell command to execute.",
+                required: true
+            }
+        ],
+        return: {
+            name: "result",
+            type: "object",
+            value: "Contains input, output, and error as string members.",
+            required: true
+        }
+    },
+
+    {
         name: "search_files",
         description: "Search for files inside the workspace by filename pattern.",
         parameters: [

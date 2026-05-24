@@ -1,9 +1,15 @@
 # filesystem.py
 
+import json
 import os
 import shutil
 import fnmatch
-from typing import List 
+from typing import List
+import subprocess
+
+from src.logger import error_details, get_logger 
+
+logger = get_logger('filesystem')
 
 WORKSPACE_ROOT = "/agent_workspace"
 
@@ -64,6 +70,42 @@ def file_exists(path: str) -> bool:
 def current_working_directory() -> str:
     return os.getcwd()
 
+
+def execute_shell(command):
+
+    shell_context = {
+        "input": command,
+        "output": None,
+        "error": None,
+    }
+
+    try:
+        
+        result = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True,
+        )
+
+        shell_context["output"] = result.stdout
+        shell_context["error"] = result.stderr
+    
+    except subprocess.CalledProcessError as e:
+        msg = f'something went wrong in execute shell {e} {error_details()}'
+        logger.error(msg)
+        shell_context['error'] = msg
+    
+    except Exception as e:
+        msg = f'something went wrong in execute shell {e} {error_details()}'
+        logger.error(msg)
+        shell_context['error'] = msg
+
+    logger.debug(f'shell_context: {shell_context}')
+
+    return shell_context
+
+
 def search_files(directory: str, pattern: str = "*") -> List[str]:
     resolved = resolve_path(directory)
 
@@ -97,3 +139,4 @@ def register_tools(registry):
     registry.register("file_exists", file_exists, schema="filesystem")
     registry.register("search_files", search_files, schema="filesystem")
     registry.register("read_text_chunks", read_text_chunks, schema="filesystem")
+    registry.register("execute_shell", execute_shell, schema="filesystem")

@@ -10,7 +10,11 @@ class ToolRegistry:
         }
 
     def get(self, name):
-        return self._tools[name]["fn"]
+        _name = name
+        if isinstance(_name, list):
+            _name = _name[0]
+
+        return self._tools[_name]["fn"]
 
     def list_tools(self):
         return self._tools
