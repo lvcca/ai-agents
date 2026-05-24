@@ -73,9 +73,24 @@ def create_task(task_id, task, LLM_DIRECT = None):
     }))
 
 def update_task(task_id, **fields):
-    data = json.loads(r.get(request_key(task_id)))
+    print(f'updating task_id: {task_id}, with fields: {fields}')
+
+    _task_id = request_key(task_id)
+
+    curr = r.get(_task_id)
+
+    if curr is None:
+        r.set(_task_id, json.dumps({
+        "id": f"{_task_id}",
+        "status": "started",
+    }))
+
+    data = json.loads(r.get(_task_id))
     data.update(fields)
+
     r.set(request_key(task_id), json.dumps(data))
+
+    print(f'updated task_id: {_task_id}, fields: {json.dumps(data)}')
 
 def get_task(task_id):
     key = request_key(task_id)
@@ -147,6 +162,8 @@ def remove_execution_task(task_id):
 
 def update_execution_task(task_id, **fields):
     _task_id = execution_key(task_id)
+
+    print(f'updating execution_id: {_task_id}, with fields: {fields}')
     
     try:
         curr = r.get(_task_id)
@@ -162,7 +179,9 @@ def update_execution_task(task_id, **fields):
         data = json.loads(r.get(_task_id))
         data.update(fields)
 
-        r.set(job_key(_task_id), json.dumps(data))
+        r.set(_task_id, json.dumps(data))
+
+        print(f'updated execution_id: {_task_id}, fields: {json.dumps(data)}')
 
     except Exception as e:
         logger.error(f'something went wrong in update_job, {e} detailed_error: {error_details()}')
@@ -172,15 +191,22 @@ def update_execution_task(task_id, **fields):
 ########
 
 def create_job(job_id, job):
-    id = job_key(job_id)
-    r.set(id, json.dumps({
-        "id":f"{id}",
+    _job_id = job_key(job_id)
+
+    print(f'create job_id: {_job_id}, job: {job}')
+
+    r.set(_job_id, json.dumps({
+        "id":f"{_job_id}",
         "status": "queued",
         "job": job,
     }))
 
 def start_job(job_id, job):
-    r.set(job_key(job_id), json.dumps({
+    _job_id = job_key(job_id)
+
+    print(f'start job_id: {_job_id}, job: {job}')
+
+    r.set(_job_id, json.dumps({
         "status": "started",
         "job": job,
     }))
@@ -194,7 +220,10 @@ def remove_job(task_id):
     r.delete(job_key(task_id))
 
 def update_job(task_id, **fields):
+
     _task_id = job_key(task_id)
+
+    print(f'updating job_id: {_task_id}, with fields: {fields}')
 
     try:
         curr = r.get(_task_id)
@@ -208,6 +237,8 @@ def update_job(task_id, **fields):
         data.update(fields)
 
         r.set(job_key(_task_id), json.dumps(data))
+
+        print(f'updated job_id: {_task_id}, fields: {json.dumps(data)}')
 
     except Exception as e:
         logger.error(f'something went wrong in update_job, {e} detailed_error: {error_details()}')

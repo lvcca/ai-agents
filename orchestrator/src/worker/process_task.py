@@ -38,6 +38,7 @@ def process_task(task_id, task):
         steps = task['identified_internal_tools_required']
 
         job_ids = []
+        job_results = []
 
         for step in steps:
             job_id = job_key(str(uuid.uuid4()))
@@ -76,7 +77,7 @@ def process_task(task_id, task):
             
             update_execution_task(task_id, status="running-processing_step", jobs_group=f"{job_str(job_ids)}")
             
-            print(f'executing tool: {Tool}. Found params: {Params}, job_ids: job_ids')
+            print(f'executing tool: {Tool}. Found params: {Params}, job_ids: {job_str(job_ids)}')
             
             found_tool = registry.get(Tool)
 
@@ -86,13 +87,18 @@ def process_task(task_id, task):
                 
                 print(f'found tool: {found_tool.__name__}')
 
-                update_job(task_id, status="running-safe_execute", jobs_group=f"{job_str(job_ids)}")
+                update_job(job_id, status="running-safe_execute", jobs_group=f"{job_str(job_ids)}")
                 
-                result = safe_execute(task_id, found_tool, Params)
+                result = safe_execute(job_id, found_tool, Params)
 
-                update_job(task_id, status="running-safe_execute completed", jobs_group=f"{job_str(job_ids)}", result=result)
+                job_results.append(result)
+
+                update_job(job_id, status="running-safe_execute completed", jobs_group=f"{job_str(job_ids)}", job_results=f"{job_str(job_results)}")
 
                 print(f'found tool: {found_tool}, result: {result}')
+            
+            else:
+                job_results.append('could not find tool')
 
         successful = True
 

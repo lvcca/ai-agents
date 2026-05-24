@@ -8,7 +8,7 @@ logger = get_logger('worker_util')
 
 def parse_json_safe(text):
     try:
-        get_logger.info('parse_json_safe text: {text}')
+        logger.info(f'parse_json_safe text: {text}')
         return json.loads(text)
     except Exception:   
         return None
@@ -41,14 +41,11 @@ def get_params(Params):
         param_len = len(Params)
         for i in range(param_len):
             xargs.append(Params[i]['value'])
-
-    print(xargs)
     
     return xargs
 
 
 def normalize_and_call(key, fn, Params):
-    print('normalize and call')
 
     update_job(key, status='in normalize call')
 
@@ -56,6 +53,7 @@ def normalize_and_call(key, fn, Params):
         if isinstance(Params, dict):
             update_job(key, status="found params as dict")
             print('is dict')
+            
             if (Params.items()) > 0:
                 return fn(**Params)
             else:
@@ -64,6 +62,7 @@ def normalize_and_call(key, fn, Params):
         elif isinstance(Params, list):
             update_job(key, status="found params as list")
             print('is list')
+            
             if len(Params) > 0:
                 return fn(*get_params(Params))
             else:
@@ -72,6 +71,7 @@ def normalize_and_call(key, fn, Params):
         elif isinstance(Params, str):
             update_job(key, status="found params as str")
             print('is str')
+            
             if len(Params) > 0:
                 return fn(Params)
             else:
@@ -80,12 +80,14 @@ def normalize_and_call(key, fn, Params):
         else:
             update_job(key, status="found params as default")
             print('is default')
+            
             return fn()
     
     except Exception as e:
         msg = f'something went wrong in normalize_and_call: {e}, fn: {fn}, Params: {Params}, error_details: {error_details()}'
         logger.error(msg)
         update_job(key, status="failed", error=msg)
+        
         return fn()
     
 def get_shell_context(narrowed_response):
