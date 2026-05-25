@@ -123,6 +123,24 @@ def get_tasks(task_type: Task_Type = Task_Type.ALL):
 # Execution context
 ########
 
+def branched_task(task_id, new_task_id, LLM_DIRECT = None):
+
+    _old_task_id = execution_key(task_id)
+    _new_task_id = execution_key(new_task_id)
+
+    r.set(_old_task_id, json.dumps({
+        "id": _old_task_id,
+        "status": "branched",
+    }))
+
+    r.set(_new_task_id, json.dumps({
+        "id": _new_task_id,
+        "status": "queued",
+        "task": task,
+        "result": None,
+        "LLM_DIRECT": LLM_DIRECT
+    }))
+
 def create_execution_task(task_id, task, LLM_DIRECT = None):
     id = execution_key(task_id)
 

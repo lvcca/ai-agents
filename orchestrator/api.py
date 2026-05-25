@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 import uuid
-from src.state.state import Task_Type, create_execution_task, create_task, execute_task, execution_key, get_job, get_tasks, get_task, remove_execution_task, remove_task, request_key
+
+from src.worker.worker_util import post_execute
+from src.state.state import Task_Type, create_execution_task, create_task, execution_key, get_job, get_tasks, get_task, remove_execution_task, remove_task, request_key
 from src.logger import get_logger
 from src.worker.task_worker import start_task
 from src.worker.execution_worker import start_execution_task
@@ -70,27 +72,7 @@ async def rm_task(exec_id: str):
 
 @app.post("/execute")
 async def execute(payload: dict):
-    execute_id = execution_key(str(uuid.uuid4()))
-    _err = None
-    
-    try:
-        task = payload.get("task")
-        
-        logger.info(f'execution task: {task}')
-
-        create_execution_task(execute_id, task)
-        start_execution_task(execute_id, task)
-
-    except Exception as e:
-        logger.error(f'something went wrong in execute {e}')
-        _err = e
-
-    response = {"task_id": execute_id, "status": "queued"}
-
-    if _err is not None:
-        response["error"] = _err
-    
-    return response
+    return post_execute(payload, create_execution_task, start_execution_task)
 
 ########
 # all jobs

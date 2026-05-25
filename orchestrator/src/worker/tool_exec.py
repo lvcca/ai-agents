@@ -38,7 +38,7 @@ def tool_exec(task_id, task, initial_exec):
             result = process_task(task_id, task)
 
             update_execution_task(task_id,
-                status="failed",
+                status="completed",
                 task_result=result
             )
 

@@ -1,9 +1,10 @@
 import threading
 import json
+
 from src.worker.tool_exec import tool_exec
 from src.state.state import update_execution_task
 from src.llm import call_llm_toolcall, PROMPTS
-from src.logger import get_logger
+from src.logger import error_details, get_logger
 
 logger = get_logger('execution_worker')
 
@@ -23,45 +24,44 @@ def run_agents(task_id, task, LLM_DIRECT):
             )
 
             initial_exec = call_llm_toolcall(f"""
-                You are an System Execution agent.
+You are an System Execution agent.
 
-                Your job is to take decomposed tasks written into concise executable steps and execute them using internal APIs identified in the FileSystemApiSchema.
-                                    
-                Tool Request Format AND FileSystemApiSchema:
-                {
-                    json.dumps(PROMPTS['tool_types'], indent=4)
-                }
+Your job is to take decomposed tasks written into concise executable steps and execute them using internal APIs identified in the FileSystemApiSchema.
+                    
+Tool Request Format AND FileSystemApiSchema:
+{
+    json.dumps(PROMPTS['tool_types'], indent=4)
+}
 
-                TASK:
-                {task}
+TASK:
+{task}
 
-                RULES:
-                - Use ONLY valid JSON as output 
-                - Always explain reasoning
-                - Do NOT include markdown
-                - There are at most 5 steps
-                - Steps are concrete and actionable
-                - Any text not in Javascript notation WILL be prepended with a comment
+RULES:
+- Use ONLY valid JSON as output 
+- Always explain reasoning
+- Do NOT include markdown
+- There are at most 5 steps
+- Steps are concrete and actionable
+- Any text not in Javascript notation MUST be prepended with a comment
 
-                ONLY ACCEPTABLE OUTPUT FORMAT:
-                Tool_Output
+ONLY ACCEPTABLE OUTPUT FORMAT:
+Tool_Output
             """)
             
             logger.info(f'initial_exec: {initial_exec}')
             
             tool_output = tool_exec(task_id, task, initial_exec)
-
-            final_output = tool_output
             
-            final_output = json.dumps({ "output": final_output, "task": task }, indent=2, ensure_ascii=False )
+            final_output = json.dumps({ "output": tool_output, "task": task, "initial_exec": initial_exec }, indent=2, ensure_ascii=False )
 
         update_execution_task(task_id,
             status="done",
-            # status="completed",
             result=final_output
         )
 
     except Exception as e:
+        logger.error(f'something went wrong in execution worker: {e}, error_details: {error_details()}')
+        
         update_execution_task(task_id,
             status="failed",
             result=str(e)

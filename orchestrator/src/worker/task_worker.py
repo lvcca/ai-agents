@@ -87,49 +87,49 @@ def run_agents(task_id, task, LLM_DIRECT):
 
         else:
             plan = call_llm_tasks(f"""
-                You are a planning agent.
+You are a planning agent.
 
-                Your job is to decompose tasks into concise executable steps.
+Your job is to decompose tasks into concise executable steps.
 
-                RULES:
-                - Return ONLY valid JSON
-                - Do not explain reasoning
-                - Do not include markdown
-                - Use at most 5 steps
-                - Steps must be concrete and actionable
+RULES:
+- Return ONLY valid JSON
+- Do not explain reasoning
+- Do not include markdown
+- Use at most 5 steps
+- Steps must be concrete and actionable
 
-                OUTPUT FORMAT:
-                {{
-                "steps": [
-                    "step 1",
-                    "step 2"
-                ]
-                }}
+OUTPUT FORMAT:
+{{
+"steps": [
+    "step 1",
+    "step 2"
+]
+}}
 
-                TASK:
-                {task}
-                """)
+TASK:
+{task}
+            """)
             
             revised_plan = revise_plan(task_id, task, plan, call_llm_tasks)
 
             final_output = call_llm_tasks(f"""
-                You are an execution agent.
+You are an execution agent.
 
-                Your job is to complete the requested task using the provided plan.
+Your job is to complete the requested task using the provided plan.
 
-                ORIGINAL TASK:
-                {task}
+ORIGINAL TASK:
+{task}
 
-                PLAN:
-                {revised_plan}
+PLAN:
+{revised_plan}
 
-                RULES:
-                - Follow the steps carefully
-                - Be concise
-                - Do not explain your reasoning unless necessary
-                - Return only the completed result
+RULES:
+- Follow the steps carefully
+- Be concise
+- Do not explain your reasoning unless necessary
+- Return only the completed result
 
-                EXECUTION:
+EXECUTION:
                 """)
             
             final_output = json.dumps({"output": final_output, "task": task, "plan": revised_plan}, indent=2, ensure_ascii=False)

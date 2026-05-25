@@ -1,8 +1,11 @@
-from src.state.state import update_job
-from src.logger import get_logger
 import json
-from src.llm import PROMPTS, error_details
 import re
+import uuid
+import requests
+
+from src.state.state import execution_key, update_job
+from src.logger import get_logger
+from src.llm import PROMPTS, error_details
 
 logger = get_logger('worker_util')
 
@@ -107,3 +110,58 @@ def get_shell_context(narrowed_response):
             logger.error(f"get_shell_context error for key={key}: {e}")
 
     return default_shell_context
+
+
+def execute_task (task):
+    '''
+        Example usage
+        payload = {"task": {"name": "example_task", "description": "This is an example task"}}
+        execute_task_directly(payload)
+    '''
+
+    logger.info(f'task type: {type(task)}')
+    logger.info(f'task: {task}')
+
+    payload = {"task": task}
+    payload = json.dumps(payload)
+
+    logger.info(f'execute_task with payload: {payload}')
+    
+    url = "http://localhost:8000/execute"
+    
+    try:
+        
+        response = requests.post(url, json=payload)
+
+        logger.info(f'execute_task with payload: {json.dumps(response.json())}')
+        
+        if response.status_code == 200:
+            return {"task_id": response.json()["task_id"], "status": "queued"}            
+        
+    
+    except Exception as e:
+        logger.error(f'something went wrong in execute_directly: {e}')
+
+
+def post_execute(payload, create_execution_task, start_execution_task):
+    execute_id = execution_key(str(uuid.uuid4()))
+    _err = None
+    
+    try:
+        task = payload.get("task")
+        
+        logger.info(f'execution task: {task}')
+
+        create_execution_task(execute_id, task)
+        start_execution_task(execute_id, task)
+
+    except Exception as e:
+        logger.error(f'something went wrong in execute {e}')
+        _err = e
+
+    response = {"task_id": execute_id, "status": "queued"}
+
+    if _err is not None:
+        response["error"] = _err
+    
+    return response

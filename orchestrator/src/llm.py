@@ -12,12 +12,14 @@ EXECUTION_PROMPTS_FILE = "prompts/execution_prompts.md"
 CHAT_PROMPTS_FILE = "prompts/chat_prompts.md"
 TOOL_NARROWER_PROMPTS_FILE = "prompts/tool_narrower.md"
 SHELL_EXECUTOR_PROMPTS_FILE = "prompts/shell_executor_prompts.md"
+SHELL_EXECUTOR_BRANCH_PROMPTS_FILE = "prompts/shell_executor_branch_prompts.md"
 SHELL_RESULTS_ANALYZER_PROMPTS_FILE ="prompts/shell_results_analyzer_prompts.md"
 KARPATHY_GUIDELINES_PROMPTS_FILE = "prompts/karpathy_guidelines_prompts.md"
 
 # types
 TOOL_API_TYPE_FILE = "prompts/types/ApiToolChain.ts"
 SHELL_EXECUTOR_TYPE_FILE = "prompts/types/ShellExecutor.ts"
+SHELL_BRANCH_ANALYSIS_TYPE_FILE = "prompts/types/ShellBranch.ts"
 SHELL_RESULTS_TYPE_FILE = "prompts/types/ShellResults.ts"
 
 # consts
@@ -55,9 +57,11 @@ PROMPTS = {
     # shell executor stuffs
     "shell_executor" : load_context(SHELL_EXECUTOR_PROMPTS_FILE),
     "shell_executor_types" : load_context(SHELL_EXECUTOR_TYPE_FILE),
+    "shell_executor_branch_analysis_types" : load_context(SHELL_BRANCH_ANALYSIS_TYPE_FILE),
+    "shell_executor_branch_analyst" : load_context(SHELL_EXECUTOR_BRANCH_PROMPTS_FILE),
     # shell results
     "shell_results_analyzer" : load_context(SHELL_RESULTS_ANALYZER_PROMPTS_FILE),
-    "shell_results_types" : load_context(SHELL_RESULTS_TYPE_FILE),
+    "shell_results_types" : load_context(SHELL_RESULTS_TYPE_FILE),    
 }
 
 def call_llm(prompt, model=QWEN3_CODER):
@@ -109,4 +113,8 @@ def call_llm_shell_executor(prompt):
 
 def call_llm_shell_results_analyzer(prompt):
     with_context = PROMPTS['shell_results_analyzer'] + str(prompt)
+    return call_llm(with_context)
+
+def call_llm_shell_branch_analyzer(prompt):
+    with_context = PROMPTS['shell_executor_branch_analyst'] + PROMPTS['shell_executor_branch_analysis_types'] + str(prompt)
     return call_llm(with_context)
