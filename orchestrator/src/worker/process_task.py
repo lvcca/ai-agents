@@ -2,13 +2,27 @@
 import json
 import uuid
 
-from src.worker.process_task_util import analyze_shell_results, get_second_opinion, job_str
+from src.worker.process_task_util import analyze_shell_results, get_second_opinion, job_str, simplify_opinion
 from src.worker.worker_util import extract_response_block, post_execute, safe_execute
 from src.logger import get_logger, error_details
 from src.state.state import create_job, get_execution_task, get_job, job_key, start_job, update_execution_task, update_job, create_execution_task
 from bootstrap import registry
 
 logger = get_logger('execution_worker')
+
+def should_pivot(pivot_recommended, pivot_required): 
+    success = False
+    
+    try:
+        recommended = isinstance(pivot_recommended, bool) and pivot_recommended is True
+        required = isinstance(pivot_required, bool) and pivot_required is True
+
+        success = recommended or required
+    
+    except Exception as e:
+        logger.error(f'something went wrong in pivot: {e}, error_details: {error_details()}')
+
+    return success
 
 def _start_execution_task(task_id, task):
     from src.worker.execution_worker import start_execution_task
@@ -110,14 +124,20 @@ def process_task(task_id, task):
 
                     logger.info(f'second opinion: {json.dumps(second_opinion)}')
 
+                    # if pivot required call api to start new task with recommendation
                     next_step = second_opinion.get('next_step')
                     pivot_required = second_opinion.get('pivot_required')
+                    pivot_recommended = second_opinion.get('pivot_recommended')
                     
-                    # if pivot required call api to start new task with recommendation
-                    if isinstance(pivot_required, bool) and pivot_required is True:
+                    if should_pivot(pivot_recommended, pivot_required):
                         logger.info('Pivot_required is true!')
+
+                        _next_step = simplify_opinion(next_step)
+                        _next_step = extract_response_block(_next_step)
+                        _next_step = json.loads(extracted_block)
+                        _next_step = _next_step.get('next_step')
                         
-                        _payload = {"task": f"Only using tools in the tool schema, {next_step}"}
+                        _payload = {"task": f"Only using tools in the tool schema, {_next_step}"}
 
                         _response = post_execute(_payload, create_execution_task, _start_execution_task)
 

@@ -13,6 +13,7 @@ CHAT_PROMPTS_FILE = "prompts/chat_prompts.md"
 TOOL_NARROWER_PROMPTS_FILE = "prompts/tool_narrower.md"
 SHELL_EXECUTOR_PROMPTS_FILE = "prompts/shell_executor_prompts.md"
 SHELL_EXECUTOR_BRANCH_PROMPTS_FILE = "prompts/shell_executor_branch_prompts.md"
+SHELL_EXECUTOR_BRANCH_SIMPLIFIER_PROMPTS_FILE = "prompts/shell_executor_branch_simplifier.md"
 SHELL_RESULTS_ANALYZER_PROMPTS_FILE ="prompts/shell_results_analyzer_prompts.md"
 KARPATHY_GUIDELINES_PROMPTS_FILE = "prompts/karpathy_guidelines_prompts.md"
 
@@ -59,6 +60,7 @@ PROMPTS = {
     "shell_executor_types" : load_context(SHELL_EXECUTOR_TYPE_FILE),
     "shell_executor_branch_analysis_types" : load_context(SHELL_BRANCH_ANALYSIS_TYPE_FILE),
     "shell_executor_branch_analyst" : load_context(SHELL_EXECUTOR_BRANCH_PROMPTS_FILE),
+    "shell_executor_branch_simplifier" : load_context(SHELL_EXECUTOR_BRANCH_SIMPLIFIER_PROMPTS_FILE),
     # shell results
     "shell_results_analyzer" : load_context(SHELL_RESULTS_ANALYZER_PROMPTS_FILE),
     "shell_results_types" : load_context(SHELL_RESULTS_TYPE_FILE),    
@@ -117,4 +119,8 @@ def call_llm_shell_results_analyzer(prompt):
 
 def call_llm_shell_branch_analyzer(prompt):
     with_context = PROMPTS['shell_executor_branch_analyst'] + PROMPTS['shell_executor_branch_analysis_types'] + str(prompt)
+    return call_llm(with_context)
+
+def call_llm_shell_branch_simplifier(prompt):
+    with_context = PROMPTS['shell_executor_branch_simplifier'] + str(prompt)
     return call_llm(with_context)

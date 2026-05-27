@@ -119,6 +119,20 @@ def get_tasks(task_type: Task_Type = Task_Type.ALL):
 
     return tasks
 
+def get_original_tasks(task_id):
+    result = None
+    try:
+        curr = r.get(task_id)
+        original_task_goal = curr.get('original_task_goal')
+        
+        if original_task_goal is not None:
+            result = original_task_goal
+
+    except Exception as e:
+        logger.error(f'something went wrong in get_original_tasks error: {e}, error_details: {error_details()}') 
+
+    return result
+
 ########
 # Execution context
 ########

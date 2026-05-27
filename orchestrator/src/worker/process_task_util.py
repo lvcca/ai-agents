@@ -1,12 +1,26 @@
 import json
 
-from src.llm import call_llm_shell_branch_analyzer, call_llm_shell_results_analyzer
-from src.worker.worker_util import PROMPTS, safe_execute
-from src.logger import get_logger, error_details
-from src.state.state import create_job, get_execution_task, get_job, get_task, job_key, start_job, update_execution_task, update_job
+from src.llm import call_llm_shell_branch_analyzer, call_llm_shell_branch_simplifier
+from src.worker.worker_util import PROMPTS
+from src.logger import get_logger
+from src.state.state import get_execution_task, get_job
 from bootstrap import registry
 
 logger = get_logger('process_task_util')
+
+def simplify_opinion(next_step):
+    final_result = call_llm_shell_branch_simplifier(f"""
+You are a quality assurance expert. 
+
+Input:
+{ next_step }
+
+Expected Output Format:
+<LLM_RESPONSE>
+    ShellBranchAnalysisSimplified
+</LLM_RESPONSE>
+""")
+    return final_result
 
 def get_second_opinion(analysis, job_results, job_ids, task_id):
     final_result = call_llm_shell_branch_analyzer(f"""
@@ -26,11 +40,8 @@ A pivot is NOT required when:
 - Failures are recoverable within the current execution strategy
 - Additional execution within the same branch could still satisfy the task
 
-A pivot IS required when:
-- The branch has irreversibly diverged from the task goal
-- Continuing execution within the current branch cannot satisfy the task
-- The current execution strategy is no longer viable or helpful for resolving the current task.
-- No viable continuation exists within the current branch.
+A pivot IS recommended (pivot_recommended) when:
+- original_task_goal has not been accomplished and next_step would change that.
 
 Interpretation Rules:
 - Evaluate trajectory viability from observed execution results and existing state.
